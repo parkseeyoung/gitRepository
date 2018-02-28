@@ -965,6 +965,10 @@ bool Widget::TestWebService()
 //其实应该要放到线程中去，不然如果连不上的话回卡死
 QString Widget::queryData_WS()
 {
+    //连不上服务器
+    if(m_addrIndex<0)
+        return "";
+
     QString sql = QString::fromLocal8Bit("select 车站名称 from BQ_ANPDATA where ID=2");
 
     char*  ch;
@@ -976,8 +980,9 @@ QString Widget::queryData_WS()
     soap_init(&wb_soap);
     soap_set_mode(&wb_soap,SOAP_C_UTFSTRING);
     XmlConfig xc;
-
-    char endpoint[1024]= "http://192.168.0.245:190/updataService.asmx";
+    QString str_endpoint = "http://"+m_addr[m_addrIndex]+":190/updataService.asmx";
+    char endpoint[1024];
+    strcpy(endpoint,qPrintable(str_endpoint));
     //soap_serve(&wb_soap);
 
     //soap_call_dataStream(&add_soap,server,"",name,data,returnFlag)
