@@ -105,7 +105,7 @@ private:
     QTreeView *checkedTree;
     QStandardItemModel* ctmodel;
     //上传情况查询表
-    QTableView * upRecordTb;
+    QTreeView * upRecordTb;
     QStandardItemModel *upInfoMd;
 
     //菜单

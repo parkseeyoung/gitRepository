@@ -144,12 +144,16 @@ void XmlConfig::createXml(QStandardItemModel *treemodel, QStandardItemModel *tab
 
     file.close();
 }
-void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
+void XmlConfig::getInfo(QString _xmlStr, QStandardItemModel *_tableModel)
 {
+    /*
+     * 由于建立的是一个树形结构
+     * 分类：
+     * 1.根节点，但是并不确定谁是根节点
+     * 2.item都先不放到tree里面，等遍历完了所有的记录再放进去
+     */
     QDomDocument doc;   //新建QDomDocument代表一个xml文档
     doc.setContent(_xmlStr);
-
-    //_tableModel->clear();
 
     //解析各个节点
     QDomElement docElem = doc.documentElement();//返回根元素
@@ -159,7 +163,7 @@ void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
         while(!n.isNull())
         {
             QDomElement e = n.toElement();//将其转换为元素
-            qDebug() << e.tagName();
+            qDebug() << e.tagName();        //Table
             QList<QStandardItem*>items;
             QDomNodeList list = e.childNodes();//获得元素e的所有子节点的列表
             for(int i = 0;i<list.count();i++)//遍历该列表
@@ -170,7 +174,7 @@ void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
                     qDebug()<<node.toElement().tagName()
                            <<node.toElement().text();
                     QStandardItem * node_item = new QStandardItem(node.toElement().text());
-                    items.append(node_item);                
+                    items.append(node_item);
                 }
             }
             n = n.nextSibling();//下一个兄弟节点
@@ -179,6 +183,49 @@ void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
                 _tableModel->appendRow(items);
         }
     }
+}
+
+void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
+{
+    /*
+     * 由于建立的是一个树形结构
+     * 分类：
+     * 1.根节点，但是并不确定谁是根节点
+     * 2.item都先不放到tree里面，等遍历完了所有的记录再放进去
+     */
+    QDomDocument doc;   //新建QDomDocument代表一个xml文档
+    doc.setContent(_xmlStr);
+
+    //解析各个节点
+    QDomElement docElem = doc.documentElement();//返回根元素
+    for(int index = 0 ; index < docElem.childNodes().count(); index++)  //实际只有一个就是NewDataSet
+    {
+        if(index == 1)
+            break;
+        QDomNode n = docElem.childNodes().at(index);
+        while(!n.isNull())
+        {
+            QDomElement e = n.toElement();//将其转换为元素
+            qDebug() << e.tagName();        //Table
+            QDomNodeList list = e.childNodes();//获得元素e的所有子节点的列表
+            /*
+             * 0    单位名称
+             * 1    编码
+             * 2    上级编码
+            */
+            QString dwname = list.at(0).toElement().text();
+            QString code = list.at(1).toElement().text();
+            QString parent_code = list.at(2).toElement().text();
+            QStandardItem *temp_item = new QStandardItem(dwname);
+            treeNode temp_node(temp_item,code,parent_code);
+
+            treeNodes[code]=temp_node;
+
+            n = n.nextSibling();//下一个兄弟节点
+            qDebug()<<"*********---------------***********";
+        }
+    }
+    addTreeViewItem(_tableModel);
 }
 QString XmlConfig::getOneQueryData(QString _xmlStr)
 {
@@ -208,4 +255,27 @@ QString XmlConfig::getOneQueryData(QString _xmlStr)
             qDebug()<<"*********---------------***********";
         }
     }
+}
+void XmlConfig::addTreeViewItem(QStandardItemModel *_tableModel)
+{
+    QList<QStandardItem*>topTreeNodeList;
+    //遍历treeNodes
+    QHashIterator<QString,treeNode> i(treeNodes);
+    while(i.hasNext())
+    {
+        i.next();
+        QString theParentCode = i.value().parent_code;
+        if(treeNodes.contains(theParentCode))
+        {
+            QHash<QString,treeNode>::const_iterator it = treeNodes.find(theParentCode);
+            it.value().node_item->appendRow(i.value().node_item);
+        }
+        else
+        {
+            topTreeNodeList.append(i.value().node_item);
+        }
+    }
+
+    _tableModel->appendRow(topTreeNodeList);
+
 }

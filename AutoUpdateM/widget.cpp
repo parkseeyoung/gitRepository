@@ -170,14 +170,11 @@ void Widget::iniConnect()
 //上传情况
 void Widget::iniUpRecordTable()
 {
-    upRecordTb = new QTableView();
+    upRecordTb = new QTreeView();
     upInfoMd = new QStandardItemModel(upRecordTb);
     upInfoMd->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("ID"));
 
-
-
     upRecordTb->setModel(upInfoMd);
-    upRecordTb->horizontalHeader()->setStretchLastSection(true);
     upInfo->addWidget(upRecordTb);
 
     //双击变单击
@@ -800,7 +797,6 @@ void Widget::setServer()
         retStr.clear();
     }
     //m_addrIndex = 0;
-    iniUpRecordTable();
 }
 void Widget::setUnEdit(QStandardItem * fwq)
 {
@@ -969,7 +965,8 @@ QString Widget::queryData_WS()
     if(m_addrIndex<0)
         return "";
 
-    QString sql = QString::fromLocal8Bit("select 车站名称 from BQ_ANPDATA where ID=2");
+    //最后显示的时候要以一个树形结构显示出来
+    QString sql = QString::fromLocal8Bit("select 单位名称,编码,上级编码 from AU_UPLOADRECORD");
 
     char*  ch;
     QByteArray ba = sql.toUtf8();
