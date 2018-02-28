@@ -977,12 +977,8 @@ QString Widget::queryData_WS()
     soap_set_mode(&wb_soap,SOAP_C_UTFSTRING);
     XmlConfig xc;
 
-    char * ip = "192.168.0.245";
-
     char endpoint[1024]= "http://192.168.0.245:190/updataService.asmx";
-    soap_bind(&wb_soap,endpoint,190,BACKLOG);
     //soap_serve(&wb_soap);
-    soap_set_endpoint(&wb_soap,endpoint);
 
     //soap_call_dataStream(&add_soap,server,"",name,data,returnFlag)
     _ns1__QueryData qd;
@@ -993,7 +989,7 @@ QString Widget::queryData_WS()
 
     soap_call___ns1__QueryData(
                 &wb_soap,
-                NULL,
+                endpoint,
                 NULL,
                 &qd,
                 qdResponse
