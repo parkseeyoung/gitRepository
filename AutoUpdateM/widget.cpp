@@ -42,6 +42,15 @@ Widget::~Widget()
 {
 
 }
+//退出时保存最后一次的几何形状和位置
+void Widget::closeEvent(QCloseEvent *event)
+{
+    QSettings settings("ZBXH","AUTOUPDATE");
+    settings.setValue("geometry",saveGeometry());
+    //settings.setValue("windowState",saveState());
+    QWidget::closeEvent(event);
+}
+
 void Widget::treeClick(const QModelIndex & index)
 {
     qtm->setFilter(QString::fromLocal8Bit("名称='%1'").arg(index.data().toString()));
@@ -101,8 +110,9 @@ void Widget::deleteFile()
 {
     if(!selectedUtIndex.isValid())
         return;
-    utModel->removeRow(selectedUtIndex.row());
-    //list_file->removeAt(selectedUtIndex.row());
+    int selectedRow = selectedUtIndex.row();
+    utModel->removeRow(selectedRow);
+    list_file->removeAt(selectedRow);
 }
 
 bool Widget::ConnectDB(QString strPath)
@@ -170,15 +180,23 @@ void Widget::iniConnect()
 //上传情况
 void Widget::iniUpRecordTable()
 {
-    upRecordTb = new QTreeView();
-    upInfoMd = new QStandardItemModel(upRecordTb);
-    upInfoMd->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("ID"));
+    //tree
+    upRecordTreeView = new QTreeView();
+    upInfoTreeMd = new QStandardItemModel(upRecordTreeView);
+    upInfoTreeMd->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("单位名称"));
 
-    upRecordTb->setModel(upInfoMd);
-    upInfo->addWidget(upRecordTb);
+    upRecordTreeView->setModel(upInfoTreeMd);
+    upInfo->addWidget(upRecordTreeView);
 
     //双击变单击
-    connect(upRecordTb,SIGNAL(clicked(QModelIndex)),upRecordTb,SLOT(edit(QModelIndex)));
+    connect(upRecordTreeView,SIGNAL(clicked(QModelIndex)),upRecordTreeView,SLOT(edit(QModelIndex)));
+
+    //table
+    upRecordTabelView = new QTableView();
+    upInfoTableMd = new QStandardItemModel(upRecordTabelView);
+    upInfoTableMd->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("更新文件")<<QString::fromLocal8Bit("更新时间")
+                                             <<QString::fromLocal8Bit("更新结果")<<QString::fromLocal8Bit("所属软件"));
+    upInfo->addWidget(upRecordTabelView);
 }
 
 //上传文件表
@@ -579,6 +597,9 @@ void Widget::saveTable(bool)
 {
     qDebug()<<qtm->submitAll();
     qDebug()<<qtm->lastError();
+
+    if(m_addrIndex=-1)
+        return;
     TestWebService();
     queryData_WS();
 }
@@ -666,6 +687,13 @@ void Widget::submitFile()
     XmlConfig::createXml(ctmodel,utModel,SoftListCmb->currentText());
     QVector<theFile*>files;
     QStringList _filenames;
+
+    //还要加上xml文件
+    QString xmlFilePath = QDir::currentPath()+"/UpdaterList.xml";
+    theFile *file = new theFile("UpdaterList.xml",xmlFilePath,-1);
+    files.append(file);
+    _filenames.append(QString::fromLocal8Bit("UpdaterList.xml"));
+
     if(utModel->rowCount() == 0)
         return;
     for (int row = 0; row < utModel->rowCount(); ++row)
@@ -681,11 +709,7 @@ void Widget::submitFile()
         _filenames.append(filename);
     }
 
-    //还要加上xml文件
-    QString xmlFilePath = QDir::currentPath()+"/UpdaterList.xml";
-    theFile *file = new theFile("UpdaterList.xml",xmlFilePath,-1);
-    files.append(file);
-    _filenames.append(QString::fromLocal8Bit("UpdaterList.xml"));
+
 
     sendToSvrMessage(_filenames);
 
@@ -718,8 +742,10 @@ void Widget::fileUploadFinished(const int row, const qreal progress)
 //更新进度条
 void Widget::updateProcBar(QVariant value)
 {
+    //获取第一列的长度
+    qreal col_width = ut->columnWidth(0);
     qreal progress = value.toReal();
-    QLinearGradient linearGrad(QPointF(progress, progress), QPointF(100, 100));
+    QLinearGradient linearGrad(QPointF(progress, progress), QPointF(col_width,col_width));
     linearGrad.setColorAt(0, QColor("#00CD00"));
     linearGrad.setColorAt(1, Qt::black);
     QBrush brush(linearGrad);
@@ -1005,7 +1031,7 @@ QString Widget::queryData_WS()
     QString ret = QString::fromUtf8(qdResponse.QueryDataResult);
     qDebug()<<ret;
     soap_end(&wb_soap);
-    xc.getUpdateInfo(ret,upInfoMd);
+    xc.getUpdateInfo(ret,upInfoTreeMd);
     return true;
 }
 //处理xml，用信号槽，等xmlconfig处理完了以后通知主线程的槽，完成view的刷新

@@ -105,8 +105,12 @@ private:
     QTreeView *checkedTree;
     QStandardItemModel* ctmodel;
     //上传情况查询表
-    QTreeView * upRecordTb;
-    QStandardItemModel *upInfoMd;
+    QTreeView * upRecordTreeView;
+    QStandardItemModel *upInfoTreeMd;
+
+    QTableView *upRecordTabelView;
+    QStandardItemModel *upInfoTableMd;
+
 
     //菜单
     QMenuBar *menubar;
@@ -182,6 +186,9 @@ private:
 
 private:
     void Highlights();
+
+    void closeEvent(QCloseEvent *event);
+    void readSettings();
 
 };
 

@@ -258,6 +258,8 @@ QString XmlConfig::getOneQueryData(QString _xmlStr)
 }
 void XmlConfig::addTreeViewItem(QStandardItemModel *_tableModel)
 {
+    _tableModel->clear();
+    _tableModel->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("单位名称"));
     QList<QStandardItem*>topTreeNodeList;
     //遍历treeNodes
     QHashIterator<QString,treeNode> i(treeNodes);
