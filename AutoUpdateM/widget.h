@@ -74,6 +74,9 @@ private slots:
 
     //更新view
     void updateInfoInquire();
+
+    //uptree被点击
+    void upRecordTreeClick(const QModelIndex &index);
 //Action
 public:
     QAction *exitAction;
@@ -189,6 +192,9 @@ private:
 
     void closeEvent(QCloseEvent *event);
     void readSettings();
+
+    //uptable刷新
+    void upRecordTabelRefresh(QString);
 
 };
 

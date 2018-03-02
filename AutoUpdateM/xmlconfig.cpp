@@ -1,5 +1,6 @@
 ﻿#include "xmlconfig.h"
-
+QHash<QString,treeNode> XmlConfig::treeNodes;
+QMultiMap<QString,treeNode> XmlConfig::tableNodes;
 XmlConfig::XmlConfig()
 {
 
@@ -195,6 +196,9 @@ void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
      */
     QDomDocument doc;   //新建QDomDocument代表一个xml文档
     doc.setContent(_xmlStr);
+    //初始化
+    treeNodes.clear();
+    tableNodes.clear();
 
     //解析各个节点
     QDomElement docElem = doc.documentElement();//返回根元素
@@ -212,14 +216,29 @@ void XmlConfig::getUpdateInfo(QString _xmlStr, QStandardItemModel *_tableModel)
              * 0    单位名称
              * 1    编码
              * 2    上级编码
+             * 3    软件名称
+             * 4    更新时间
+             * 5    更新成功
+             * 6    服务器名称
+             * 7    服务器ip
             */
             QString dwname = list.at(0).toElement().text();
             QString code = list.at(1).toElement().text();
             QString parent_code = list.at(2).toElement().text();
+            QString softname = list.at(3).toElement().text();
+            QString uptime = list.at(4).toElement().text();
+            QString upsuc = list.at(5).toElement().text();
+            QString fwqname = list.at(6).toElement().text();
+            QString fwqip = list.at(7).toElement().text();
+
             QStandardItem *temp_item = new QStandardItem(dwname);
+            temp_item->setEditable(false);
+
             treeNode temp_node(temp_item,code,parent_code);
+            treeNode temp_node_t(temp_item,code,parent_code,softname,uptime,upsuc,fwqname,fwqip);
 
             treeNodes[code]=temp_node;
+            tableNodes.insert(dwname,temp_node_t);
 
             n = n.nextSibling();//下一个兄弟节点
             qDebug()<<"*********---------------***********";
@@ -280,4 +299,26 @@ void XmlConfig::addTreeViewItem(QStandardItemModel *_tableModel)
 
     _tableModel->appendRow(topTreeNodeList);
 
+}
+void XmlConfig::refreshUpRecordTable(QStandardItemModel *model,QString dwname)
+{
+    model->clear();
+    model->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("软件名称")<<QString::fromLocal8Bit("更新时间")
+                                             <<QString::fromLocal8Bit("更新结果")
+                                             <<QString::fromLocal8Bit("更新服务器")<<QString::fromLocal8Bit("更新服务器ip"));
+
+    if(treeNodes.isEmpty())
+        return;
+    QList<treeNode>values = tableNodes.values(dwname);
+    for(int i = 0 ; i < values.size() ; i++)
+    {
+        QList<QStandardItem*>items;
+        QStandardItem *softname = new QStandardItem(values.at(i).softname);
+        QStandardItem *uptime = new QStandardItem(values.at(i).uptime);
+        QStandardItem *upsuc = new QStandardItem(values.at(i).upsuc);
+        QStandardItem *fwqname = new QStandardItem(values.at(i).fwqname);
+        QStandardItem *fwqip = new QStandardItem(values.at(i).fwqip);
+        items<<softname<<uptime<<upsuc<<fwqname<<fwqip;
+        model->appendRow(items);
+    }
 }

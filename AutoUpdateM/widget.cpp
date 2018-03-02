@@ -194,9 +194,27 @@ void Widget::iniUpRecordTable()
     //table
     upRecordTabelView = new QTableView();
     upInfoTableMd = new QStandardItemModel(upRecordTabelView);
-    upInfoTableMd->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("更新文件")<<QString::fromLocal8Bit("更新时间")
-                                             <<QString::fromLocal8Bit("更新结果")<<QString::fromLocal8Bit("所属软件"));
+    upInfoTableMd->setHorizontalHeaderLabels(QStringList()<<QString::fromLocal8Bit("软件名称")<<QString::fromLocal8Bit("更新时间")
+                                             <<QString::fromLocal8Bit("更新结果")
+                                             <<QString::fromLocal8Bit("更新服务器")<<QString::fromLocal8Bit("更新服务器ip"));
+    upRecordTabelView->setModel(upInfoTableMd);
+    upRecordTabelView->horizontalHeader()->setStretchLastSection(true);
+
     upInfo->addWidget(upRecordTabelView);
+
+
+    //建立单击的connect
+    connect(upRecordTreeView,SIGNAL(clicked(QModelIndex)),this,SLOT(upRecordTreeClick(QModelIndex)));
+}
+void Widget::upRecordTreeClick(const QModelIndex &index)
+{
+    QString dwname = index.data().toString();
+    upRecordTabelRefresh(dwname);
+}
+void Widget::upRecordTabelRefresh(QString dwname)
+{
+    //只调用了一次webservice，然后将结果保存到本地，现在只要用xml里面的东西就行
+    XmlConfig::refreshUpRecordTable(upInfoTableMd,dwname);
 }
 
 //上传文件表
@@ -598,7 +616,7 @@ void Widget::saveTable(bool)
     qDebug()<<qtm->submitAll();
     qDebug()<<qtm->lastError();
 
-    if(m_addrIndex=-1)
+    if(m_addrIndex==-1)
         return;
     TestWebService();
     queryData_WS();
@@ -708,8 +726,6 @@ void Widget::submitFile()
         files.append(file);
         _filenames.append(filename);
     }
-
-
 
     sendToSvrMessage(_filenames);
 
@@ -992,7 +1008,7 @@ QString Widget::queryData_WS()
         return "";
 
     //最后显示的时候要以一个树形结构显示出来
-    QString sql = QString::fromLocal8Bit("select 单位名称,编码,上级编码 from AU_UPLOADRECORD");
+    QString sql = QString::fromLocal8Bit("select 单位名称,编码,上级编码,软件名称,S_UDTIME,更新成功,服务器名称,IP地址 from AU_UPLOADRECORD");
 
     char*  ch;
     QByteArray ba = sql.toUtf8();
