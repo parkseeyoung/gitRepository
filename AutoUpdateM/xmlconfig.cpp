@@ -298,7 +298,6 @@ void XmlConfig::addTreeViewItem(QStandardItemModel *_tableModel)
     }
 
     _tableModel->appendRow(topTreeNodeList);
-
 }
 void XmlConfig::refreshUpRecordTable(QStandardItemModel *model,QString dwname)
 {
@@ -314,10 +313,15 @@ void XmlConfig::refreshUpRecordTable(QStandardItemModel *model,QString dwname)
     {
         QList<QStandardItem*>items;
         QStandardItem *softname = new QStandardItem(values.at(i).softname);
+        softname->setTextAlignment(Qt::AlignHCenter);
         QStandardItem *uptime = new QStandardItem(values.at(i).uptime);
+        uptime->setTextAlignment(Qt::AlignHCenter);
         QStandardItem *upsuc = new QStandardItem(values.at(i).upsuc);
+        upsuc->setTextAlignment(Qt::AlignHCenter);
         QStandardItem *fwqname = new QStandardItem(values.at(i).fwqname);
+        fwqname->setTextAlignment(Qt::AlignHCenter);
         QStandardItem *fwqip = new QStandardItem(values.at(i).fwqip);
+        fwqip->setTextAlignment(Qt::AlignHCenter);
         items<<softname<<uptime<<upsuc<<fwqname<<fwqip;
         model->appendRow(items);
     }

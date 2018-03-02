@@ -190,7 +190,8 @@ void Widget::iniUpRecordTable()
 
     //双击变单击
     connect(upRecordTreeView,SIGNAL(clicked(QModelIndex)),upRecordTreeView,SLOT(edit(QModelIndex)));
-
+    //建立单击的connect
+    connect(upRecordTreeView,SIGNAL(clicked(QModelIndex)),this,SLOT(upRecordTreeClick(QModelIndex)));
     //table
     upRecordTabelView = new QTableView();
     upInfoTableMd = new QStandardItemModel(upRecordTabelView);
@@ -202,9 +203,6 @@ void Widget::iniUpRecordTable()
 
     upInfo->addWidget(upRecordTabelView);
 
-
-    //建立单击的connect
-    connect(upRecordTreeView,SIGNAL(clicked(QModelIndex)),this,SLOT(upRecordTreeClick(QModelIndex)));
 }
 void Widget::upRecordTreeClick(const QModelIndex &index)
 {
@@ -725,6 +723,7 @@ void Widget::submitFile()
         qDebug()<<filename<<"****"<<filepath<<"****";
         files.append(file);
         _filenames.append(filename);
+        qDebug()<<filename;
     }
 
     sendToSvrMessage(_filenames);

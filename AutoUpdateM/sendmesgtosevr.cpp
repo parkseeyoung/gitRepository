@@ -57,7 +57,7 @@ void SendMesgToSevr::run()
     //send
     qDebug() << QString::fromLocal8Bit(" 向服务器发送数据:  ")<<files;
     const int filesLen = files.count();
-    retVal = send(sHost,qPrintable(files), filesLen+10, 0);
+    retVal = send(sHost,qPrintable(files), filesLen, 0);
     if (SOCKET_ERROR == retVal)
     {
         qDebug() << "send failed!" ;
