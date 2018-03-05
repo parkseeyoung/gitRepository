@@ -21,7 +21,7 @@ UploadFile::~UploadFile()
     if(sock_clt)
         closesocket(sock_clt);
 }
-
+//伪非阻塞
 void UploadFile::start()
 {
     //开始上传
