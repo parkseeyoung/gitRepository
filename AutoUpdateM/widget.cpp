@@ -1,8 +1,11 @@
 ﻿#define TIME_OUT 1
 #include "widget.h"
+
+/*webservice采用gsoap生成*/
 #include <sapi.h>
 #include <sphelper.h>
 #include "./include/updataServiceSoap.nsmap"
+
 #pragma comment(lib,"sapi.lib")
 #define BACKLOG (100)    /* Max. request backlog */
 
