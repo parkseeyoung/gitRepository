@@ -108,12 +108,14 @@ void XmlConfig::createXml(QStandardItemModel *treemodel, QStandardItemModel *tab
     root.appendChild(updater);
 
     //Application
+    QString verStr = QDateTime::currentDateTime().toString("yyyyMMddhhmmss");
+    //
     QDomElement application = doc.createElement("Application");
     QDomElement run = doc.createElement("Run");
     QDomElement ver = doc.createElement("Ver");
     QDomElement prover = doc.createElement("ProVer");
     QDomText runText = doc.createTextNode("runtext");
-    QDomText verText = doc.createTextNode("verText");
+    QDomText verText = doc.createTextNode(verStr);
     QDomText proverText = doc.createTextNode("proverText");
 
     application.appendChild(run);
